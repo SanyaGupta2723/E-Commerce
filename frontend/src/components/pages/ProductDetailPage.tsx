@@ -10,39 +10,51 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { useAppContext } from "../../context/AppContext";
-import { getProductById, getProducts } from "../../services/productService";
+import { getProductById } from "../../services/productService";
+import { Product } from "../../types";
 import { ProductCard } from "../common/ProductCard";
 import { Button } from "../common/Button";
 
 export const ProductDetailPage: React.FC = () => {
   const { state, dispatch } = useAppContext();
+  const { selectedProductId, products } = state;
 
-  const [product, setProduct] = useState<any>(null);
+  const [product, setProduct] = useState<Product | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
-  const [recommended, setRecommended] = useState<any[]>([]);
+  const [recommended, setRecommended] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // 🔥 Fetch product
+  // 🔥 FETCH PRODUCT DETAILS
   useEffect(() => {
-    if (!state.selectedProductId) return;
+    if (!selectedProductId) return;
 
     const fetchProduct = async () => {
-      const data = await getProductById(state.selectedProductId);
-      setProduct(data);
+      try {
+        setLoading(true);
 
-      const res = await getProducts();
-      setRecommended(
-        res.products.filter(
-          (p: any) =>
-            p.category === data.category && p.id !== data.id
-        )
-      );
+        const data = await getProductById(selectedProductId);
+        setProduct(data);
+
+        // ✅ USE CONTEXT PRODUCTS FOR RECOMMENDED
+        const related = (products ?? []).filter(
+          p =>
+            p.category === data.category &&
+            p.id !== data.id
+        );
+
+        setRecommended(related);
+      } catch (error) {
+        console.error("Error fetching product", error);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchProduct();
-  }, [state.selectedProductId]);
+  }, [selectedProductId, products]);
 
-  if (!product) {
+  if (loading || !product) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         Loading...
@@ -69,7 +81,10 @@ export const ProductDetailPage: React.FC = () => {
 
         {/* 🔙 BACK */}
         <button
-          onClick={() => dispatch({ type: "SET_PAGE", payload: "shop" })}
+          onClick={() => {
+            dispatch({ type: "SET_SELECTED_PRODUCT", payload: null });
+            dispatch({ type: "SET_PAGE", payload: "shop" });
+          }}
           className="flex items-center text-sm text-gray-600 mb-6"
         >
           <ArrowLeft className="w-4 h-4 mr-1" /> Back to shop
@@ -139,7 +154,7 @@ export const ProductDetailPage: React.FC = () => {
               <div className="flex border rounded">
                 <button
                   className="px-3"
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  onClick={() => setQuantity(q => Math.max(1, q - 1))}
                 >
                   -
                 </button>
@@ -147,8 +162,8 @@ export const ProductDetailPage: React.FC = () => {
                 <button
                   className="px-3"
                   onClick={() =>
-                    setQuantity(
-                      Math.min(product.inStock, quantity + 1)
+                    setQuantity(q =>
+                      Math.min(product.inStock, q + 1)
                     )
                   }
                 >
@@ -217,7 +232,7 @@ export const ProductDetailPage: React.FC = () => {
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {recommended.slice(0, 4).map((item) => (
+              {recommended.slice(0, 4).map(item => (
                 <ProductCard key={item.id} product={item} />
               ))}
             </div>

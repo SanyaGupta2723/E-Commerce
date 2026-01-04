@@ -11,6 +11,7 @@ interface AppState {
   previousPage: Page | null;
   selectedProductId: string | null;
   cart: CartItem[];
+  products: Product[];
   user: User | null;
   orders: Order[];
   searchQuery: string;
@@ -22,7 +23,7 @@ interface AppState {
 
 type AppAction =
   | { type: 'SET_PAGE'; payload: Page }
-  | { type: 'SET_SELECTED_PRODUCT'; payload: string }
+  | { type: 'SET_SELECTED_PRODUCT'; payload: string | null }
   | { type: 'ADD_TO_CART'; payload: { product: Product; quantity: number } }
   | { type: 'UPDATE_CART_QUANTITY'; payload: { productId: string; quantity: number } }
   | { type: 'REMOVE_FROM_CART'; payload: string }
@@ -33,6 +34,7 @@ type AppAction =
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'SET_ERROR'; payload: string | null }
   | { type: 'PLACE_ORDER'; payload: string }
+  | { type: 'SET_PRODUCTS'; payload: Product[] }
   | { type: 'ADD_ORDER'; payload: Order };
 
 const initialState: AppState = {
@@ -59,6 +61,12 @@ function appReducer(state: AppState, action: AppAction): AppState {
         previousPage: state.currentPage,
         currentPage: action.payload
       };
+      case 'SET_PRODUCTS':
+  return {
+    ...state,
+    products: action.payload
+  };
+
 
     case 'SET_SELECTED_PRODUCT':
       return {
@@ -89,6 +97,8 @@ function appReducer(state: AppState, action: AppAction): AppState {
         cart: [...state.cart, action.payload]
       };
     }
+    
+
 
     case 'UPDATE_CART_QUANTITY':
       return {
@@ -136,11 +146,6 @@ function appReducer(state: AppState, action: AppAction): AppState {
         orderNumber: action.payload,
         cart: []
       };
-      case "SET_PRODUCTS":
-  return {
-    ...state,
-    products: action.payload
-  };
 
 
     case 'ADD_ORDER':

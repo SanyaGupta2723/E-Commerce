@@ -149,4 +149,4 @@ export const mockOrders: Order[] = [
   }
 ];
 
-export const categories = ['All', 'Electronics', 'Apparel', 'Home & Garden', 'Books'];
+export const categories = ['All', 'Electronics', 'Outdoors',  'Apparel', 'Home & Garden', 'Books'];

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getProducts } from '../../services/productService';
 
+
 import {
   ArrowRight,
   Star,
@@ -42,18 +43,20 @@ const heroSlides = [
 export const HomePage: React.FC = () => {
   const { dispatch } = useAppContext();
   const [products, setProducts] = useState<any[]>([]);
-  useEffect(() => {
-  const fetchProducts = async () => {
-    const data = await getProducts();
+useEffect(() => {
+  const fetchTrendingProducts = async () => {
+    try {
+      // 👇 sirf 4 products ke liye (Trending)
+      const data = await getProducts(1, 4);
 
-    if (Array.isArray(data)) {
-      setProducts(data);   // ✅ direct array
-    } else {
+      setProducts(data.products ?? []);
+    } catch (err) {
+      console.error(err);
       setProducts([]);
     }
   };
 
-  fetchProducts();
+  fetchTrendingProducts();
 }, []);
 
 

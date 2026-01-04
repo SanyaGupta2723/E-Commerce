@@ -17,7 +17,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   };
 
   const handleProductClick = () => {
-    dispatch({ type: 'SET_SELECTED_PRODUCT', payload: product._id || product.id });
+    dispatch({ type: 'SET_SELECTED_PRODUCT', payload: product.id || product.id });
     dispatch({ type: 'SET_PAGE', payload: 'product' });
   };
 
